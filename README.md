@@ -2,15 +2,11 @@
 
 Học kỳ 2, Năm học 2022-2023
 
-**MSSV 1** : 
+**MSSV 1** : B1910082
 
-**Họ tên SV 1**:
+**Họ tên SV 1**: Trần Tuấn Khanh
 
-**MSSV 2**:
+**Lớp học phần**: CT48403
 
-**Họ tên SV 2**:
-
-**Lớp học phần**:
-
-**Tên dự án**:
+**Tên dự án**: Ứng dụng di dộng bán phụ kiện
 

@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:myproject_app/model/user.dart';
+import 'package:myproject_app/ui/product/product_view.dart';
 
 import '../screen.dart';
 
@@ -14,8 +17,18 @@ class LoginView extends StatefulWidget {
 
 class _LoginViewState extends State<LoginView> {
   bool pass = true;
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey();
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     precacheImage(img_bg, context);
@@ -77,6 +90,7 @@ class _LoginViewState extends State<LoginView> {
 
   _buildEmailField() {
     return TextFormField(
+      controller: _emailController,
       decoration: InputDecoration(
         prefixIcon: const Icon(
           Icons.email_rounded,
@@ -159,12 +173,7 @@ class _LoginViewState extends State<LoginView> {
 
   _buildSubmitField() {
     return ElevatedButton(
-      onPressed: () {
-        if (!_formKey.currentState!.validate()) {
-          return;
-        }
-        _formKey.currentState!.save();
-      },
+      onPressed: _signIn,
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.pinkAccent,
         shape: RoundedRectangleBorder(
@@ -300,5 +309,20 @@ class _LoginViewState extends State<LoginView> {
         ),
       ],
     );
+  }
+
+  Future<User?> _signIn() async {
+    if (_formKey.currentState!.validate()) {
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+        email: _emailController.text.trim(),
+        password: _passwordController.text.trim(),
+      )
+          .then((value) {
+        Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const HomeView()));
+      });
+    }
+    return null;
   }
 }

@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
+import '../../model/user.dart';
 import '../screen.dart';
 
 class RegisterView extends StatefulWidget {
@@ -13,9 +16,11 @@ class RegisterView extends StatefulWidget {
 class _RegisterViewState extends State<RegisterView> {
   bool pass = true;
   bool repass = true;
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _repasswordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey();
+  late Users user;
   @override
   Widget build(BuildContext context) {
     precacheImage(img_bg, context);
@@ -54,7 +59,7 @@ class _RegisterViewState extends State<RegisterView> {
                               decoration: BoxDecoration(
                                   color: Colors.white24,
                                   borderRadius: BorderRadius.circular(30)),
-                              child: Icon(Icons.arrow_back, size: 35),
+                              child: const Icon(Icons.arrow_back, size: 35),
                             ),
                           ),
                           Container(
@@ -89,6 +94,7 @@ class _RegisterViewState extends State<RegisterView> {
 
   _buildEmailField() {
     return TextFormField(
+      controller: _emailController,
       decoration: InputDecoration(
         prefixIcon: const Icon(
           Icons.email_rounded,
@@ -177,11 +183,44 @@ class _RegisterViewState extends State<RegisterView> {
 
   _buildSubmitField() {
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
         if (!_formKey.currentState!.validate()) {
           return;
         }
+        FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: _emailController.text, password: _passwordController.text);
+
         _formKey.currentState!.save();
+        FirebaseFirestore.instance
+            .collection("users")
+            .doc(_emailController.text)
+            .set(
+          {
+            "email": _emailController.text,
+            "address": "",
+            "phone": "",
+          },
+          SetOptions(merge: true),
+        );
+        showDialog<String>(
+          context: context,
+          builder: (BuildContext context) => AlertDialog(
+            title: const Text('Đăng ký thành công'),
+            content: const Text(
+                'Đăng nhập ngay để nhận ngay hàng ngàn sản phẩm được trợ giá'),
+            actions: <Widget>[
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.of(context).pushReplacement(
+                    MaterialPageRoute(builder: (context) => const LoginView())),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.pinkAccent,

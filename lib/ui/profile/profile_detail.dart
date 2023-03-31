@@ -20,24 +20,24 @@ class _ProfileDetailState extends State<ProfileDetail> {
 
   @override
   Widget build(BuildContext context) {
+    double width = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Cập nhật thông tin"),
+        title: const Text("Cập nhật thông tin"),
       ),
       body: ListView(
-        padding: EdgeInsets.all(15),
+        padding: const EdgeInsets.all(15),
         children: [
-          Container(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                children: [
-                  _buildEmailField(),
-                  _buildAddressField(),
-                  _buildPhoneField(),
-                  _buildSubmitField(),
-                ],
-              ),
+          Form(
+            key: _formKey,
+            child: Column(
+              children: [
+                _buidAvataField(width),
+                _buildEmailField(),
+                _buildAddressField(),
+                _buildPhoneField(),
+                _buildSubmitField(),
+              ],
             ),
           ),
         ],
@@ -135,12 +135,14 @@ class _ProfileDetailState extends State<ProfileDetail> {
     return ElevatedButton(
       onPressed: () {
         if (_formKey.currentState!.validate()) {
-          FirebaseFirestore.instance.collection("users").doc(idUser!.email).set(
+          FirebaseFirestore.instance
+              .collection("users")
+              .doc(idUser!.email)
+              .update(
             {
-              "address": _addressController.text,
-              "phone": _phoneController.text,
+              "address": _addressController.text.trim(),
+              "phone": _phoneController.text.trim(),
             },
-            SetOptions(merge: true),
           );
           return;
         }
@@ -158,6 +160,37 @@ class _ProfileDetailState extends State<ProfileDetail> {
       child: const Text(
         "Cập nhật",
         style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+      ),
+    );
+  }
+
+  Widget _buidAvataField(double width) {
+    return InkWell(
+      child: Container(
+        width: width / 3.5,
+        height: width / 3.5,
+        decoration: BoxDecoration(
+          color: Colors.blue,
+          borderRadius: BorderRadius.circular(width),
+        ),
+        child: Stack(
+          alignment: Alignment.bottomCenter,
+          children: [
+            Container(
+                height: width / 10,
+                width: width / 3.5,
+                decoration: BoxDecoration(
+                    color: Colors.white60,
+                    borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(width),
+                        bottomRight: Radius.circular(width))),
+                child: const Center(
+                    child: Text(
+                  "Sửa",
+                  style: TextStyle(fontWeight: FontWeight.w700),
+                ))),
+          ],
+        ),
       ),
     );
   }

@@ -1,17 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:myproject_app/model/user.dart';
+import 'package:myproject_app/service/user_service.dart';
 import '../screen.dart';
 
 class HomeView extends StatefulWidget {
   const HomeView({super.key});
-
   @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
   int _indexPage = 0;
-  //final idUser = FirebaseAuth.instance.currentUser;
+  final idUser = FirebaseAuth.instance.currentUser;
+  Stream<List<Users>> user = UserService.readUser();
   final List _pages = [
     const ProductView(),
     Container(color: Colors.amber),
@@ -32,6 +34,7 @@ class _HomeViewState extends State<HomeView> {
       appBar: const PreferredSize(
           preferredSize: Size.fromRadius(30), child: AppbarView()),
       body: _pages[_indexPage],
+
       bottomNavigationBar: BottomNavigationBar(
         type: BottomNavigationBarType.fixed,
         items: const [

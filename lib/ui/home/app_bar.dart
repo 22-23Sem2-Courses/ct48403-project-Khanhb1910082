@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:myproject_app/ui/cart/cart_view.dart';
 
 class AppbarView extends StatefulWidget {
   const AppbarView({super.key});
@@ -31,15 +32,21 @@ class _AppbarViewState extends State<AppbarView> {
           ),
         ),
       ),
-      actions: const [
-        Padding(
-          padding: EdgeInsets.only(right: 12),
-          child: Icon(
-            Icons.shopping_cart_outlined,
-            size: 28,
+      actions: [
+        InkWell(
+          onTap: () {
+            Navigator.push(context,
+                MaterialPageRoute(builder: (context) => const CartView()));
+          },
+          child: const Padding(
+            padding: EdgeInsets.only(right: 12),
+            child: Icon(
+              Icons.shopping_cart_outlined,
+              size: 28,
+            ),
           ),
         ),
-        Padding(
+        const Padding(
             padding: EdgeInsets.only(right: 12),
             child: Icon(Icons.chat_outlined)),
       ],

@@ -15,6 +15,7 @@ class ProductList extends StatefulWidget {
 
 class _ProductListState extends State<ProductList> {
   bool _isFavorite = false;
+  final GlobalKey _productKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Product>>(

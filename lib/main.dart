@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:myproject_app/model/user.dart';
+import 'package:myproject_app/service/user_service.dart';
 import 'package:myproject_app/ui/product/product_list.dart';
 import 'package:myproject_app/ui/product/product_view.dart';
 
@@ -36,8 +38,8 @@ class MainPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         backgroundColor: Colors.white70,
-        body: StreamBuilder<User?>(
-            stream: FirebaseAuth.instance.authStateChanges(),
+        body: StreamBuilder<List<Users>>(
+            stream: UserService.readUser(),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 return HomeView();

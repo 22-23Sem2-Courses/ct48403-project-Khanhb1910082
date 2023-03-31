@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
+import 'package:myproject_app/model/cart.dart';
 import 'package:myproject_app/model/product.dart';
 import '../screen.dart';
 
@@ -203,6 +206,22 @@ class _BottomSheetViewState extends State<BottomSheetView> {
           const SizedBox(height: 30),
           InkWell(
             onTap: () {
+              if (widget.nameBottom != 'Đặt hàng') {
+                CollectionReference cart =
+                    FirebaseFirestore.instance.collection('cart');
+                cart
+                    .doc(FirebaseAuth.instance.currentUser!.email)
+                    .collection(
+                        FirebaseAuth.instance.currentUser!.email.toString())
+                    .add(CartItem(
+                            id: widget.product.id,
+                            productName: widget.product.productName,
+                            productUrl:
+                                widget.product.productUrl[_selectedIndex],
+                            quantity: indexItem,
+                            price: widget.product.price.toDouble())
+                        .toMap());
+              }
               Navigator.push(
                   context,
                   MaterialPageRoute(

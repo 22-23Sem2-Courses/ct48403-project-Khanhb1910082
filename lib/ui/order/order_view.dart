@@ -20,17 +20,21 @@ class OrderView extends StatelessWidget {
           return ListView(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
-              children: user
-                  .where(
-                      (element) => element.email == docUser!.email.toString())
-                  .map(_buildUser)
-                  .toList());
+              children: user.map(_buildUser).toList());
         },
       ),
     );
   }
 
   Widget _buildUser(Users user) {
-    return Center(child: Text(user.email));
+    return Center(
+        child: Column(
+      children: [
+        Text(user.email),
+        Text(user.address),
+        Text(user.phone),
+        Text(user.toMap().toString())
+      ],
+    ));
   }
 }

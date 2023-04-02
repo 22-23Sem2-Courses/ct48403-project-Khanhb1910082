@@ -1,3 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 
@@ -14,8 +17,6 @@ class ProductList extends StatefulWidget {
 }
 
 class _ProductListState extends State<ProductList> {
-  bool _isFavorite = false;
-  final GlobalKey _productKey = GlobalKey();
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<List<Product>>(
@@ -45,6 +46,7 @@ class _ProductListState extends State<ProductList> {
         });
   }
 
+  bool isFavorite = false;
   Widget buidProduct(Product product) {
     return Container(
       decoration: BoxDecoration(
@@ -86,11 +88,20 @@ class _ProductListState extends State<ProductList> {
                     InkWell(
                         onTap: () {
                           setState(() {
-                            _isFavorite = !_isFavorite;
+                            FirebaseFirestore.instance
+                                .collection("favoritelist")
+                                .doc(FirebaseAuth.instance.currentUser!.email)
+                                .collection(FirebaseAuth
+                                    .instance.currentUser!.email
+                                    .toString())
+                                .doc(product.id)
+                                .set({
+                              'favorite': true,
+                            });
                           });
                         },
                         child: Icon(
-                            !_isFavorite
+                            !isFavorite
                                 ? Icons.favorite_border
                                 : Icons.favorite_sharp,
                             color: Colors.red)),
@@ -130,9 +141,9 @@ class _ProductListState extends State<ProductList> {
                     color: Colors.red,
                   ),
                 ),
-                Text(
+                const Text(
                   'Đã bán ',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                   ),
                 ),

@@ -1,40 +1,417 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:myproject_app/model/user.dart';
+import 'package:money_formatter/money_formatter.dart';
 
-import '../../service/user_service.dart';
+import '../screen.dart';
 
-class OrderView extends StatelessWidget {
+class OrderView extends StatefulWidget {
   const OrderView({super.key});
 
   @override
+  State<OrderView> createState() => _OrderViewState();
+}
+
+class _OrderViewState extends State<OrderView> {
+  @override
   Widget build(BuildContext context) {
-    final docUser = FirebaseAuth.instance.currentUser;
     return Scaffold(
-      appBar: AppBar(),
-      body: StreamBuilder<List<Users>>(
-        stream: UserService.readUser(),
-        builder: (context, snapshot) {
-          final user = snapshot.data!;
-          return ListView(
-              physics: const NeverScrollableScrollPhysics(),
-              shrinkWrap: true,
-              children: user.map(_buildUser).toList());
-        },
+      backgroundColor: Colors.white70,
+      appBar: AppBar(
+        title: const Text("Thanh toán"),
       ),
+      body: StreamBuilder(
+          stream: FirebaseFirestore.instance
+              .collection('cart')
+              .doc(FirebaseAuth.instance.currentUser!.email)
+              .collection(FirebaseAuth.instance.currentUser!.email.toString())
+              .where("payment", isEqualTo: true)
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Text(snapshot.hasError.toString());
+            } else if (snapshot.hasData) {
+              final cart = snapshot.data!;
+              double sum = 0;
+              for (int index = 0; index < snapshot.data!.docs.length; index++) {
+                sum = sum +
+                    snapshot.data!.docs[index].get("price") *
+                        snapshot.data!.docs[index].get("quantity");
+              }
+              return ListView(children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
+                      color: Colors.white,
+                      border: Border(
+                          bottom: BorderSide(
+                        color: Colors.pink,
+                        width: 3,
+                      ))),
+                  child: Column(
+                    children: [
+                      Row(
+                        children: [
+                          const Padding(
+                              padding: EdgeInsets.only(right: 10),
+                              child: Icon(
+                                Icons.fmd_good_sharp,
+                                size: 30,
+                                color: Colors.deepOrange,
+                              )),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                "Địa chỉ nhận hàng",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500, fontSize: 16),
+                              ),
+                              Text("Trần Tuấn Khanh, 0369818290"),
+                              Text("Trần Nam Phú"),
+                            ],
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+                Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: const BoxDecoration(
+                      color: Colors.green,
+                    ),
+                    child: const Center(
+                        child: Text(
+                      "Danh sách sản phẩm thanh toán",
+                      style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white),
+                    ))),
+                Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white10,
+                    border: Border.symmetric(
+                        horizontal: BorderSide(color: Colors.pink, width: 3)),
+                    //borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: SizedBox(
+                    height: MediaQuery.of(context).size.height / 2,
+                    width: MediaQuery.of(context).size.width,
+                    child: ListView.builder(
+                        itemCount: cart.docs.length,
+                        itemBuilder: (context, index) {
+                          return Container(
+                            height: 122,
+                            margin: const EdgeInsets.all(5),
+                            padding: const EdgeInsets.all(5),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  height: 100,
+                                  width: 100,
+                                  margin: const EdgeInsets.only(right: 10),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black12,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Image.network(
+                                    cart.docs[index].get("productUrl"),
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 10),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      SizedBox(
+                                        width: 150,
+                                        child: Text(
+                                          cart.docs[index].get("productName"),
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                            color:
+                                                Colors.black.withOpacity(0.7),
+                                          ),
+                                        ),
+                                      ),
+                                      Text(
+                                        cart.docs[index].get("color"),
+                                        style: TextStyle(
+                                          fontSize: 14.5,
+                                          color: Colors.black.withOpacity(0.8),
+                                        ),
+                                      ),
+                                      Text(
+                                        '${MoneyFormatter(amount: cart.docs[index].get("quantity") * cart.docs[index].get("price").toDouble()).output.withoutFractionDigits}đ',
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.deepOrange),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                const Spacer(),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 5),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          const SizedBox(width: 8),
+                                          SizedBox(
+                                            width: 25,
+                                            child: Center(
+                                              child: Text(
+                                                'x${MoneyFormatter(amount: cart.docs[index].get("quantity").toDouble()).output.withoutFractionDigits}',
+                                                style: const TextStyle(
+                                                  fontSize: 15,
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+                  ),
+                ),
+                Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                    ),
+                    child: Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: const [
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 5),
+                              child: Icon(
+                                Icons.payment,
+                                size: 30,
+                                color: Colors.deepOrange,
+                              ),
+                            ),
+                            Text(
+                              "Chi tiết thanh toán ",
+                              style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.w500),
+                            ),
+                          ],
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text("Tổng giá trị đơn hàng"),
+                              Text(MoneyFormatter(amount: sum.toDouble())
+                                  .output
+                                  .withoutFractionDigits),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: const [
+                              Text("Phí vận chuyển"),
+                              Text("0đ"),
+                            ],
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 5),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Tổng thanh toán",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500, fontSize: 16),
+                              ),
+                              Text(
+                                MoneyFormatter(amount: sum.toDouble())
+                                    .output
+                                    .withoutFractionDigits,
+                                style: TextStyle(
+                                    fontWeight: FontWeight.w500, fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    )),
+                const SizedBox(height: 5),
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                  ),
+                  child: const Text(
+                      "Nhấn \"Đặt hàng\" đồng nghĩa với việc bạn đồng ý tuân theo Điều khoản Turtle-K"),
+                ),
+              ]);
+            } else {
+              return Center(
+                child: CircularProgressIndicator(),
+              );
+            }
+          }),
+      bottomNavigationBar: _buildBottomBar(),
     );
   }
 
-  Widget _buildUser(Users user) {
-    return Center(
-        child: Column(
-      children: [
-        Text(user.email),
-        Text(user.address),
-        Text(user.phone),
-        Text(user.toMap().toString())
-      ],
-    ));
+  _buildBottomBar() {
+    double widthDevice = MediaQuery.of(context).size.width;
+
+    return StreamBuilder(
+        stream: FirebaseFirestore.instance
+            .collection('cart')
+            .doc(FirebaseAuth.instance.currentUser!.email)
+            .collection(FirebaseAuth.instance.currentUser!.email.toString())
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            print(snapshot.hasError.toString());
+          } else if (snapshot.hasData) {
+            double sum = 0;
+            for (int index = 0; index < snapshot.data!.docs.length; index++) {
+              sum = sum +
+                  snapshot.data!.docs[index].get("price") *
+                      snapshot.data!.docs[index].get("quantity");
+            }
+            return BottomAppBar(
+              child: SizedBox(
+                height: widthDevice / 7,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Row(
+                      children: [
+                        SizedBox(
+                          height: widthDevice / 7,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 30),
+                                width: widthDevice / 3,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: const [
+                                    Text(
+                                      "Tổng: ",
+                                      style: TextStyle(
+                                          color: Colors.deepOrange,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          height: widthDevice / 7,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 20),
+                                width: widthDevice / 3,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '${MoneyFormatter(amount: sum).output.withoutFractionDigits}đ',
+                                      style: const TextStyle(
+                                          color: Colors.deepOrange,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            if (snapshot.data!.size != 0) {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => TransactionView()));
+                            }
+                          },
+                          child: Container(
+                            height: widthDevice / 7,
+                            decoration:
+                                const BoxDecoration(color: Colors.pinkAccent),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SizedBox(
+                                  width: widthDevice / 3,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: const [
+                                      Text(
+                                        "Đặt hàng",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 15.5,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          } else {
+            return const Center(child: CircularProgressIndicator());
+          }
+          return const Center(child: CircularProgressIndicator());
+        });
   }
 }

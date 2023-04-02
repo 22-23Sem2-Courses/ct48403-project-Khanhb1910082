@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:myproject_app/model/user.dart';
 import 'package:myproject_app/service/user_service.dart';
+import 'package:myproject_app/ui/favorite_list/favorite_list.dart';
 import '../screen.dart';
 
 class HomeView extends StatefulWidget {
@@ -16,7 +17,7 @@ class _HomeViewState extends State<HomeView> {
   Stream<List<Users>> user = UserService.readUser();
   final List _pages = [
     const ProductView(),
-    Container(color: Colors.amber),
+    const FavoriteListView(),
     const ProfileView(),
   ];
 
@@ -31,8 +32,8 @@ class _HomeViewState extends State<HomeView> {
     return Scaffold(
       backgroundColor: Colors.white70,
       //extendBodyBehindAppBar: true,
-      appBar: const PreferredSize(
-          preferredSize: Size.fromRadius(30), child: AppbarView()),
+      // appBar: const PreferredSize(
+      //     preferredSize: Size.fromRadius(30), child: AppbarView()),
       body: _pages[_indexPage],
 
       bottomNavigationBar: BottomNavigationBar(

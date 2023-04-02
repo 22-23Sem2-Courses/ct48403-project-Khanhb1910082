@@ -7,3 +7,4 @@ export '../ui/product/product_view.dart';
 export 'cart/cart_view.dart';
 export 'profile/profile_view.dart';
 export 'order/order_view.dart';
+export 'order/transaction_view.dart';

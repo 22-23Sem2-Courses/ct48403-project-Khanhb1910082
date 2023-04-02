@@ -14,6 +14,7 @@ class CartView extends StatefulWidget {
 }
 
 class _CartViewState extends State<CartView> {
+  bool _checkout = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,8 +45,22 @@ class _CartViewState extends State<CartView> {
                         children: [
                           Checkbox(
                             activeColor: Colors.deepOrange,
-                            value: true,
-                            onChanged: (value) {},
+                            value: snapshot.data!.docs[index].get("payment"),
+                            onChanged: (value) {
+                              setState(() {
+                                value = _checkout;
+                                _checkout = !_checkout;
+                                FirebaseFirestore.instance
+                                    .collection('cart')
+                                    .doc(FirebaseAuth
+                                        .instance.currentUser!.email)
+                                    .collection(FirebaseAuth
+                                        .instance.currentUser!.email
+                                        .toString())
+                                    .doc(cart.docs[index].get("id"))
+                                    .update({"payment": _checkout});
+                              });
+                            },
                           ),
                           Container(
                             height: 100,
@@ -80,10 +95,10 @@ class _CartViewState extends State<CartView> {
                                   ),
                                 ),
                                 Text(
-                                  'Best saling',
+                                  '${cart.docs[index].get("color")}',
                                   style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.black.withOpacity(0.6),
+                                    fontSize: 14.5,
+                                    color: Colors.black.withOpacity(0.8),
                                   ),
                                 ),
                                 Text(
@@ -246,10 +261,13 @@ class _CartViewState extends State<CartView> {
           } else if (snapshot.hasData) {
             double sum = 0;
             for (int index = 0; index < snapshot.data!.docs.length; index++) {
-              sum = sum +
-                  snapshot.data!.docs[index].get("price") *
-                      snapshot.data!.docs[index].get("quantity");
+              if (snapshot.data!.docs[index].get("payment") == true) {
+                sum = sum +
+                    snapshot.data!.docs[index].get("price") *
+                        snapshot.data!.docs[index].get("quantity");
+              }
             }
+
             return BottomAppBar(
               child: SizedBox(
                 height: widthDevice / 7,
@@ -330,7 +348,7 @@ class _CartViewState extends State<CartView> {
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: const [
                                       Text(
-                                        "Đặt hàng",
+                                        "Thanh toán",
                                         style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 15.5,

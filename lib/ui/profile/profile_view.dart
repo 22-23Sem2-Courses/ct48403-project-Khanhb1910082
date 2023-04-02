@@ -12,24 +12,69 @@ class ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<ProfileView> {
   User? user = FirebaseAuth.instance.currentUser;
+
   @override
   Widget build(BuildContext context) {
+    double widthDevice = MediaQuery.of(context).size.width;
     return Scaffold(
+      backgroundColor: Colors.white60,
+      appBar: AppBar(),
       body: Center(
         child: Column(children: [
           InkWell(
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => ProfileDetail()));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const ProfileDetail()));
             },
-            child: Row(
-              children: const [
-                Icon(
-                  Icons.account_box_rounded,
-                  color: Colors.pink,
-                ),
-                Text("Cập nhật thông tin tài khoản")
-              ],
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: widthDevice / 7,
+                    padding: const EdgeInsets.all(10),
+                    child: const Icon(
+                      Icons.account_box_rounded,
+                      color: Colors.pink,
+                      size: 35,
+                    ),
+                  ),
+                  const Text(
+                    "Thông tin người dùng",
+                    style: TextStyle(fontSize: 16),
+                  )
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 5),
+          InkWell(
+            onTap: () {},
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: widthDevice / 7,
+                    padding: const EdgeInsets.all(10),
+                    child: const Icon(
+                      Icons.near_me_rounded,
+                      color: Colors.pink,
+                      size: 35,
+                    ),
+                  ),
+                  const Text(
+                    "Thông tin đơn hàng",
+                    style: TextStyle(fontSize: 16),
+                  )
+                ],
+              ),
             ),
           ),
           Text(user!.email.toString()),

@@ -213,21 +213,26 @@ class _BottomSheetViewState extends State<BottomSheetView> {
                     .doc(FirebaseAuth.instance.currentUser!.email)
                     .collection(
                         FirebaseAuth.instance.currentUser!.email.toString())
-                    .add(CartItem(
-                            id: widget.product.id,
-                            productName: widget.product.productName,
-                            productUrl:
-                                widget.product.productUrl[_selectedIndex],
-                            quantity: indexItem,
-                            price: widget.product.price.toDouble())
-                        .toMap());
+                    .doc(widget.product.id)
+                    .set(
+                        CartItem(
+                                id: widget.product.id,
+                                productName: widget.product.productName,
+                                productUrl:
+                                    widget.product.productUrl[_selectedIndex],
+                                color: widget.product.color[_selectedIndex],
+                                payment: false,
+                                quantity: indexItem,
+                                price: widget.product.price.toDouble())
+                            .toMap(),
+                        SetOptions(merge: true));
               }
               Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => widget.nameBottom != 'Đặt hàng'
                           ? const CartView()
-                          : const OrderView()));
+                          : OrderView()));
             },
             child: Container(
               padding: const EdgeInsets.all(10),

@@ -257,6 +257,7 @@ class _CartViewState extends State<CartView> {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
+            // ignore: avoid_print
             print(snapshot.hasError.toString());
           } else if (snapshot.hasData) {
             double sum = 0;
@@ -332,7 +333,7 @@ class _CartViewState extends State<CartView> {
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => OrderView()));
+                                      builder: (context) => const OrderView()));
                             }
                           },
                           child: Container(

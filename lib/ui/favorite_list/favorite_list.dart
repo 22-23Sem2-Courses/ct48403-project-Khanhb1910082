@@ -1,6 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:money_formatter/money_formatter.dart';
 import 'package:myproject_app/model/product.dart';
+import 'package:myproject_app/ui/product/product_detail.dart';
 
 import '../../service/product_service.dart';
 import '../screen.dart';
@@ -13,11 +17,15 @@ class FavoriteListView extends StatefulWidget {
 }
 
 class _FavoriteListViewState extends State<FavoriteListView> {
+  bool isFavorite = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black12,
+      backgroundColor: const Color.fromARGB(161, 255, 255, 255),
       appBar: AppBar(
+        systemOverlayStyle: const SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+        ),
         title: const Text("Sản phẩm yêu thích"),
         actions: [
           InkWell(
@@ -39,18 +47,18 @@ class _FavoriteListViewState extends State<FavoriteListView> {
         ],
       ),
       body: StreamBuilder(
-        stream: ProductService.readProduct(),
+        stream: ProductService.readProductFavorite(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Text(snapshot.hasError.toString());
-          } else if (snapshot.hasData) {
+            return const Text("Lỗi phát sinh");
+          } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
             final product = snapshot.data!;
             return ListView(
               children: product.map(buidProduct).toList(),
             );
           } else {
             return const Center(
-              child: CircularProgressIndicator(),
+              child: Text("Tìm kiếm sản phẩm yêu thích ngay nào."),
             );
           }
         },
@@ -66,16 +74,24 @@ class _FavoriteListViewState extends State<FavoriteListView> {
           decoration: const BoxDecoration(color: Colors.white),
           child: Row(
             children: [
-              SizedBox(
-                height: MediaQuery.of(context).size.width / 3.5,
-                width: MediaQuery.of(context).size.width / 3.5,
-                child: Column(
-                  children: [
-                    Image.network(
-                      product.productUrl[0],
-                      fit: BoxFit.cover,
-                    ),
-                  ],
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => ProductDetail(product)));
+                },
+                child: SizedBox(
+                  height: MediaQuery.of(context).size.width / 3.5,
+                  width: MediaQuery.of(context).size.width / 3.5,
+                  child: Column(
+                    children: [
+                      Image.network(
+                        product.productUrl[0],
+                        fit: BoxFit.cover,
+                      ),
+                    ],
+                  ),
                 ),
               ),
               Container(
@@ -97,7 +113,7 @@ class _FavoriteListViewState extends State<FavoriteListView> {
                         ),
                       ),
                     ),
-                    Text('Có sẵn: ${product.quantity.toString()}'),
+                    Text('Có sẵn: ${product.quantity - product.sold}'),
                     Text(
                       '${MoneyFormatter(amount: product.price.toDouble()).output.withoutFractionDigits}đ',
                       style: const TextStyle(
@@ -111,9 +127,23 @@ class _FavoriteListViewState extends State<FavoriteListView> {
               ),
               Column(
                 children: [
-                  const Icon(
-                    Icons.favorite_border,
-                    size: 28,
+                  InkWell(
+                    onTap: () {
+                      setState(() {
+                        FirebaseFirestore.instance
+                            .collection("favoritelist")
+                            .doc(FirebaseAuth.instance.currentUser!.email)
+                            .collection(FirebaseAuth.instance.currentUser!.email
+                                .toString())
+                            .doc(product.id)
+                            .delete();
+                      });
+                    },
+                    child: const Icon(
+                      Icons.favorite_outlined,
+                      size: 28,
+                      color: Colors.pink,
+                    ),
                   ),
                 ],
               )

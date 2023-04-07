@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:flutter/src/widgets/placeholder.dart';
+import '../screen.dart';
 
 class TransactionView extends StatefulWidget {
   const TransactionView({super.key});
@@ -39,13 +38,32 @@ class _TransactionViewState extends State<TransactionView> {
                 Column(
                   children: [
                     ElevatedButton(
-                        onPressed: () {}, child: const Text("Trang chủ"))
+                        onPressed: () {
+                          Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const HomeView()),
+                              (route) => false);
+                        },
+                        child: const Text("Trang chủ"))
                   ],
                 ),
                 Column(
                   children: [
                     ElevatedButton(
-                        onPressed: () {}, child: const Text("Đơn hàng")),
+                        onPressed: () {
+                          // Navigator.pushAndRemoveUntil(
+                          //     context,
+                          //     MaterialPageRoute(
+                          //         builder: (context) => const HomeView()),
+                          //     (route) => false);
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) =>
+                                      const OrderStatusView()));
+                        },
+                        child: const Text("Đơn hàng")),
                   ],
                 )
               ],

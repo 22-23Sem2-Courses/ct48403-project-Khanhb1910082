@@ -1,5 +1,5 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:myproject_app/ui/product/product_list.dart';
 
 import '../screen.dart';
@@ -11,6 +11,9 @@ class ProductView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          systemOverlayStyle: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+          ),
           title: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8),
             height: 35,

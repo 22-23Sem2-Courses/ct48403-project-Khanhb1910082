@@ -1,22 +1,27 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:myproject_app/model/user.dart';
-import 'package:myproject_app/ui/screen.dart';
+import 'package:myproject_app/service/user_service.dart';
 
 class ProfileDetail extends StatefulWidget {
-  const ProfileDetail({super.key});
-
+  const ProfileDetail(this.user, {super.key});
+  final Users user;
   @override
   State<ProfileDetail> createState() => _ProfileDetailState();
 }
 
 class _ProfileDetailState extends State<ProfileDetail> {
-  final idUser = FirebaseAuth.instance.currentUser;
-  final _phoneController = TextEditingController();
-  final _addressController = TextEditingController();
+  var _emailController = TextEditingController();
+  var _phoneController = TextEditingController();
+  var _addressController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey();
-  late Users updateUser;
+  var updateUser = Users(email: '', address: '', phone: '');
+  @override
+  void initState() {
+    _emailController = TextEditingController(text: widget.user.email);
+    _phoneController = TextEditingController(text: widget.user.phone);
+    _addressController = TextEditingController(text: widget.user.address);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,9 +38,13 @@ class _ProfileDetailState extends State<ProfileDetail> {
             child: Column(
               children: [
                 _buidAvataField(width),
+                const SizedBox(height: 10),
                 _buildEmailField(),
+                const SizedBox(height: 5),
                 _buildAddressField(),
+                const SizedBox(height: 5),
                 _buildPhoneField(),
+                const SizedBox(height: 10),
                 _buildSubmitField(),
               ],
             ),
@@ -47,6 +56,7 @@ class _ProfileDetailState extends State<ProfileDetail> {
 
   _buildEmailField() {
     return TextFormField(
+      controller: _emailController,
       enabled: false,
       decoration: InputDecoration(
         prefixIcon: const Icon(
@@ -55,14 +65,14 @@ class _ProfileDetailState extends State<ProfileDetail> {
         ),
         fillColor: Colors.white,
         filled: true,
-        hintText: FirebaseAuth.instance.currentUser!.email,
-        hintStyle: const TextStyle(color: Colors.black),
         border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(30),
             borderSide: BorderSide.none),
       ),
-      keyboardType: TextInputType.emailAddress,
       cursorColor: Colors.pink,
+      onSaved: (newValue) {
+        updateUser = updateUser.copyWith(email: newValue);
+      },
     );
   }
 
@@ -133,22 +143,15 @@ class _ProfileDetailState extends State<ProfileDetail> {
 
   _buildSubmitField() {
     return ElevatedButton(
-      onPressed: () {
-        if (_formKey.currentState!.validate()) {
-          FirebaseFirestore.instance
-              .collection("users")
-              .doc(idUser!.email)
-              .update(
-            {
-              "address": _addressController.text.trim(),
-              "phone": _phoneController.text.trim(),
-            },
-          );
+      onPressed: () async {
+        if (!_formKey.currentState!.validate()) {
           return;
         }
-
-        // Navigator.of(context)
-        //     .push(MaterialPageRoute(builder: (context) => ProfileView()));
+        _formKey.currentState!.save();
+        await UserService.updateUser(updateUser);
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.pinkAccent,

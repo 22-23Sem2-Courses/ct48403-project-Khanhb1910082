@@ -65,7 +65,8 @@ class _BottomSheetViewState extends State<BottomSheetView> {
                     const Expanded(
                       child: SizedBox(),
                     ),
-                    Text("Số lượng: ${widget.product.quantity}"),
+                    Text(
+                        "Số lượng: ${widget.product.quantity - widget.product.sold}"),
                   ],
                 ),
               ),
@@ -168,7 +169,8 @@ class _BottomSheetViewState extends State<BottomSheetView> {
                 child: InkWell(
                   onTap: () {
                     setState(() {
-                      if (indexItem < 40) {
+                      if (indexItem <
+                          widget.product.quantity - widget.product.sold) {
                         indexItem++;
                       }
                     });
@@ -226,13 +228,33 @@ class _BottomSheetViewState extends State<BottomSheetView> {
                                 price: widget.product.price.toDouble())
                             .toMap(),
                         SetOptions(merge: true));
+              } else {
+                CollectionReference cart =
+                    FirebaseFirestore.instance.collection('cart');
+                cart
+                    .doc(FirebaseAuth.instance.currentUser!.email)
+                    .collection(
+                        FirebaseAuth.instance.currentUser!.email.toString())
+                    .doc(widget.product.id)
+                    .set(
+                        CartItem(
+                                id: widget.product.id,
+                                productName: widget.product.productName,
+                                productUrl:
+                                    widget.product.productUrl[_selectedIndex],
+                                color: widget.product.color[_selectedIndex],
+                                payment: true,
+                                quantity: indexItem,
+                                price: widget.product.price.toDouble())
+                            .toMap(),
+                        SetOptions(merge: true));
               }
               Navigator.push(
                   context,
                   MaterialPageRoute(
                       builder: (context) => widget.nameBottom != 'Đặt hàng'
                           ? const CartView()
-                          : OrderView()));
+                          : const OrderView()));
             },
             child: Container(
               padding: const EdgeInsets.all(10),

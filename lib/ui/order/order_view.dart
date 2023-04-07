@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
+import 'package:myproject_app/model/user.dart';
+import 'package:myproject_app/service/user_service.dart';
 
 import '../screen.dart';
 
@@ -59,18 +61,27 @@ class _OrderViewState extends State<OrderView> {
                                 size: 30,
                                 color: Colors.deepOrange,
                               )),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
-                              Text(
-                                "Địa chỉ nhận hàng",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w500, fontSize: 16),
-                              ),
-                              Text("Trần Tuấn Khanh, 0369818290"),
-                              Text("Trần Nam Phú"),
-                            ],
-                          ),
+                          StreamBuilder(
+                              stream: UserService.readUser(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasError) {
+                                  return Center(
+                                      child:
+                                          Text(snapshot.hasError.toString()));
+                                } else if (snapshot.hasData) {
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: snapshot.data!
+                                        .map(_buildUserDetail)
+                                        .toList(),
+                                  );
+                                } else {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+                              }),
                         ],
                       )
                     ],
@@ -230,7 +241,7 @@ class _OrderViewState extends State<OrderView> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text("Tổng giá trị đơn hàng"),
+                              const Text("Tổng giá trị đơn hàng"),
                               Text(MoneyFormatter(amount: sum.toDouble())
                                   .output
                                   .withoutFractionDigits),
@@ -252,16 +263,14 @@ class _OrderViewState extends State<OrderView> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
+                              const Text(
                                 "Tổng thanh toán",
                                 style: TextStyle(
                                     fontWeight: FontWeight.w500, fontSize: 16),
                               ),
                               Text(
-                                MoneyFormatter(amount: sum.toDouble())
-                                    .output
-                                    .withoutFractionDigits,
-                                style: TextStyle(
+                                '${MoneyFormatter(amount: sum.toDouble()).output.withoutFractionDigits}đ',
+                                style: const TextStyle(
                                     fontWeight: FontWeight.w500, fontSize: 16),
                               ),
                             ],
@@ -280,7 +289,7 @@ class _OrderViewState extends State<OrderView> {
                 ),
               ]);
             } else {
-              return Center(
+              return const Center(
                 child: CircularProgressIndicator(),
               );
             }
@@ -300,13 +309,15 @@ class _OrderViewState extends State<OrderView> {
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            print(snapshot.hasError.toString());
+            return Center(child: Text(snapshot.hasError.toString()));
           } else if (snapshot.hasData) {
             double sum = 0;
             for (int index = 0; index < snapshot.data!.docs.length; index++) {
-              sum = sum +
-                  snapshot.data!.docs[index].get("price") *
-                      snapshot.data!.docs[index].get("quantity");
+              if (snapshot.data!.docs[index].get("payment") == true) {
+                sum = sum +
+                    snapshot.data!.docs[index].get("price") *
+                        snapshot.data!.docs[index].get("quantity");
+              }
             }
             return BottomAppBar(
               child: SizedBox(
@@ -367,13 +378,63 @@ class _OrderViewState extends State<OrderView> {
                           ),
                         ),
                         InkWell(
-                          onTap: () {
+                          onTap: () async {
                             if (snapshot.data!.size != 0) {
+                              final cart = snapshot.data!;
+                              for (int index = 0;
+                                  index < cart.docs.length;
+                                  index++) {
+                                if (cart.docs[index].get("payment") == true) {
+                                  FirebaseFirestore.instance
+                                      .collection('orders')
+                                      .doc(FirebaseAuth
+                                          .instance.currentUser!.email)
+                                      .collection(FirebaseAuth
+                                          .instance.currentUser!.email
+                                          .toString())
+                                      .doc()
+                                      .set(cart.docs[index].data(),
+                                          SetOptions(merge: false));
+                                  FirebaseFirestore.instance
+                                      .collection('cart')
+                                      .doc(FirebaseAuth
+                                          .instance.currentUser!.email)
+                                      .collection(FirebaseAuth
+                                          .instance.currentUser!.email
+                                          .toString())
+                                      .doc(cart.docs[index].get("id"))
+                                      .delete();
+                                  final total = FirebaseFirestore.instance
+                                      .collection('accessory')
+                                      .doc(cart.docs[index].get("id"));
+                                  final snap = await total.get();
+                                  FirebaseFirestore.instance
+                                      .collection('accessory')
+                                      .doc(cart.docs[index].get("id"))
+                                      .update({
+                                    "sold": snap.get("sold") +
+                                        cart.docs[index].get("quantity")
+                                  });
+                                }
+                              }
+                              // ignore: use_build_context_synchronously
                               Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (context) => TransactionView()));
+                                      builder: (context) =>
+                                          const TransactionView()));
                             }
+                            // var collection = FirebaseFirestore.instance
+                            //     .collection('orders')
+                            //     .doc(FirebaseAuth.instance.currentUser!.email)
+                            //     .collection(FirebaseAuth
+                            //         .instance.currentUser!.email
+                            //         .toString());
+                            // var snapshots = await collection.get();
+                            // for (var doc in snapshots.docs) {
+                            //   if (doc.get("id") == 'bag1')
+                            //     print(doc.reference.id.toString());
+                            // }
                           },
                           child: Container(
                             height: widthDevice / 7,
@@ -411,7 +472,36 @@ class _OrderViewState extends State<OrderView> {
           } else {
             return const Center(child: CircularProgressIndicator());
           }
-          return const Center(child: CircularProgressIndicator());
         });
+  }
+
+  Widget _buildUserDetail(Users user) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Địa chỉ nhận hàng",
+          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 5),
+          child: Row(
+            children: [
+              Text(user.email,
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w500)),
+              const SizedBox(width: 10),
+              Text('Phone: ${user.phone}',
+                  style: const TextStyle(
+                      fontSize: 15, fontWeight: FontWeight.w500)),
+            ],
+          ),
+        ),
+        Text(
+          'Địa chỉ: ${user.address}',
+          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+        ),
+      ],
+    );
   }
 }

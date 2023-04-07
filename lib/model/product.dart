@@ -5,6 +5,7 @@ class Product {
   final String describe;
   final int price;
   final int quantity;
+  final int sold;
   final String type;
   final List<String> color;
   Product({
@@ -13,6 +14,7 @@ class Product {
     required this.productUrl,
     required this.describe,
     required this.price,
+    required this.sold,
     required this.quantity,
     required this.type,
     required this.color,
@@ -22,11 +24,13 @@ class Product {
     return <String, dynamic>{
       'id': id,
       'productName': productName,
-      'productUrl': List<String>.from(['productUrl']),
+      'productUrl': productUrl,
       'describe': describe,
       'price': price,
       'quantity': quantity,
+      'sold': sold,
       'type': type,
+      'color': color,
     };
   }
 
@@ -37,6 +41,7 @@ class Product {
       productUrl: List<String>.from((map['productUrl'])),
       describe: map['describe'],
       price: map['price'] as int,
+      sold: map['sold'],
       quantity: map['quantity'] as int,
       type: map['type'] as String,
       color: List<String>.from((map['color'])),

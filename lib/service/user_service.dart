@@ -8,7 +8,14 @@ class UserService {
       .snapshots()
       .map((snapshot) => snapshot.docs
           .map((doc) => Users.fromMap(doc.data()))
-          .where((element) =>
-              element.email == FirebaseAuth.instance.currentUser!.email)
+          .where(
+              (user) => user.email == FirebaseAuth.instance.currentUser!.email)
           .toList());
+
+  static updateUser(Users updateUser) {
+    FirebaseFirestore.instance
+        .collection("users")
+        .doc(updateUser.email)
+        .update(updateUser.toMap());
+  }
 }

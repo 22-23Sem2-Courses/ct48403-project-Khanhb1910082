@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 import 'package:myproject_app/model/product.dart';
+import 'package:myproject_app/ui/cart/cart_view.dart';
 import 'package:myproject_app/ui/product/product_detail_bottom.dart';
 import 'package:myproject_app/ui/product/product_filter.dart';
 
@@ -13,8 +16,8 @@ class ProductDetail extends StatefulWidget {
 }
 
 class _ProductDetailState extends State<ProductDetail> {
-  bool _favorite = false;
   int _selectedIndex = 0;
+  final user = FirebaseAuth.instance.currentUser!.email;
   @override
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
@@ -22,15 +25,21 @@ class _ProductDetailState extends State<ProductDetail> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(1, 0, 0, 0),
-        actions: const [
+        actions: [
           Padding(
-            padding: EdgeInsets.only(right: 12),
-            child: Icon(
-              Icons.shopping_cart_outlined,
-              size: 28,
+            padding: const EdgeInsets.only(right: 12),
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const CartView()));
+              },
+              child: const Icon(
+                Icons.shopping_cart_outlined,
+                size: 28,
+              ),
             ),
           ),
-          Padding(
+          const Padding(
               padding: EdgeInsets.only(right: 12),
               child: Icon(Icons.chat_outlined)),
         ],
@@ -91,75 +100,170 @@ class _ProductDetailState extends State<ProductDetail> {
               ),
             ),
           ),
-          Container(
-            margin: const EdgeInsets.only(top: 8),
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
-            decoration: const BoxDecoration(
-              color: Colors.white,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  margin: const EdgeInsets.only(bottom: 10),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      SizedBox(
-                        width: width * 8 / 10,
-                        child: Text(
-                          widget.product.productName,
+          StreamBuilder(
+              stream: FirebaseFirestore.instance
+                  .collection('favoritelist')
+                  .doc(user)
+                  .collection(user.toString())
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return const Center(
+                    child: Text("Lỗi không tồn tại."),
+                  );
+                } else if (!snapshot.hasData) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                } else {
+                  bool isFavorite = false;
+                  for (int index = 0;
+                      index < snapshot.data!.docs.length;
+                      index++) {
+                    if (widget.product.id ==
+                        snapshot.data!.docs[index].get("id")) {
+                      isFavorite = true;
+                    }
+                  }
+                  return Container(
+                    margin: const EdgeInsets.only(top: 8),
+                    padding:
+                        const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              SizedBox(
+                                width: width * 8 / 10,
+                                child: Text(
+                                  widget.product.productName,
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      overflow: TextOverflow.clip),
+                                ),
+                              ),
+                              InkWell(
+                                onTap: () {
+                                  // final user = FirebaseAuth.instance.currentUser!.email;
+                                  // final fa = FirebaseFirestore.instance
+                                  //     .collection('favoritelist')
+                                  //     .doc(user)
+                                  //     .collection(user.toString())
+                                  //     .doc(widget.product.id);
+                                  // final snap = await fa.get();
+                                  // print(snap.reference.id);
+                                  if (!isFavorite) {
+                                    FirebaseFirestore.instance
+                                        .collection("favoritelist")
+                                        .doc(FirebaseAuth
+                                            .instance.currentUser!.email)
+                                        .collection(FirebaseAuth
+                                            .instance.currentUser!.email
+                                            .toString())
+                                        .doc(widget.product.id)
+                                        .set(widget.product.toMap(),
+                                            SetOptions(merge: true));
+                                  } else {
+                                    FirebaseFirestore.instance
+                                        .collection("favoritelist")
+                                        .doc(FirebaseAuth
+                                            .instance.currentUser!.email)
+                                        .collection(FirebaseAuth
+                                            .instance.currentUser!.email
+                                            .toString())
+                                        .doc(widget.product.id)
+                                        .delete();
+                                  }
+                                  setState(() {
+                                    isFavorite = !isFavorite;
+                                  });
+                                },
+                                child: Icon(
+                                  !isFavorite
+                                      ? Icons.favorite_border
+                                      : Icons.favorite_sharp,
+                                  color: Colors.deepOrange,
+                                  size: 30,
+                                ),
+                              )
+                            ],
+                          ),
+                        ),
+                        Row(
+                          children: [
+                            Text(
+                              '${MoneyFormatter(amount: widget.product.price.toDouble()).output.withoutFractionDigits}đ',
+                              style: const TextStyle(
+                                color: Colors.deepOrange,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Row(
+                            children: [
+                              const Text("Loại:"),
+                              for (int index = 0;
+                                  index < widget.product.color.length;
+                                  index++)
+                                Container(
+                                    margin: const EdgeInsets.symmetric(
+                                        horizontal: 5),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 8, vertical: 5),
+                                    decoration: const BoxDecoration(
+                                        color: Colors.orange,
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(8))),
+                                    child: Text(
+                                      widget.product.color[index],
+                                      textAlign: TextAlign.center,
+                                    )),
+                            ],
+                          ),
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: const BoxDecoration(),
+                              child: const Text(
+                                'Mô tả:',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              'Đã bán: ${widget.product.sold}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Text(
+                          widget.product.describe.toString(),
                           style: const TextStyle(
-                              fontSize: 16, overflow: TextOverflow.clip),
+                            fontSize: 15,
+                          ),
                         ),
-                      ),
-                      InkWell(
-                        onTap: () {
-                          setState(() {
-                            _favorite = !_favorite;
-                          });
-                        },
-                        child: Icon(
-                          !_favorite
-                              ? Icons.favorite_border
-                              : Icons.favorite_sharp,
-                          color: Colors.deepOrange,
-                          size: 30,
-                        ),
-                      )
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      '${MoneyFormatter(amount: widget.product.price.toDouble()).output.withoutFractionDigits}đ',
-                      style: const TextStyle(
-                        color: Colors.deepOrange,
-                        fontSize: 16,
-                      ),
+                      ],
                     ),
-                  ],
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 10),
-                  decoration: const BoxDecoration(),
-                  child: const Text(
-                    'Mô tả:',
-                    style: TextStyle(
-                      fontSize: 15,
-                    ),
-                  ),
-                ),
-                Text(
-                  widget.product.describe.toString(),
-                  style: const TextStyle(
-                    fontSize: 15,
-                  ),
-                ),
-              ],
-            ),
-          ),
+                  );
+                }
+              }),
           Container(
             margin: const EdgeInsets.only(top: 10),
             decoration: const BoxDecoration(

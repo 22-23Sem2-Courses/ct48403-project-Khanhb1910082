@@ -1,8 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:myproject_app/model/user.dart';
-import 'package:myproject_app/service/user_service.dart';
+import 'package:myproject_app/ui/cart/cart_manager.dart';
 import 'package:myproject_app/ui/favorite_list/favorite_list.dart';
+import 'package:provider/provider.dart';
 import '../screen.dart';
 
 class HomeView extends StatefulWidget {
@@ -13,8 +12,18 @@ class HomeView extends StatefulWidget {
 
 class _HomeViewState extends State<HomeView> {
   int _indexPage = 0;
-  final idUser = FirebaseAuth.instance.currentUser;
-  Stream<List<Users>> user = UserService.readUser();
+  void _setTotalCart() async {
+    final cartProvider = Provider.of<CartManager>(context, listen: false);
+    await cartProvider.setTotalCart();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _setTotalCart();
+    ChangeNotifier;
+  }
+
   final List _pages = [
     const ProductView(),
     const FavoriteListView(),

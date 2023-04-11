@@ -329,6 +329,32 @@ class _LoginViewState extends State<LoginView> {
           .then((value) {
         Navigator.of(context).pushReplacement(
             MaterialPageRoute(builder: (context) => const HomeView()));
+      }).onError((error, stackTrace) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Row(
+                children: const [
+                  Icon(
+                    Icons.warning_amber_rounded,
+                    color: Colors.amber,
+                  ),
+                  SizedBox(width: 5),
+                  Text("Tài khoản không hợp lệ"),
+                ],
+              ),
+              content: const Text("Nhập sai Email hoặc mật khẩu."),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text("OK"))
+              ],
+            );
+          },
+        );
       });
     }
     return null;

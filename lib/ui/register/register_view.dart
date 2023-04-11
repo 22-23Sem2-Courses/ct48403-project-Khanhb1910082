@@ -221,8 +221,9 @@ class _RegisterViewState extends State<RegisterView> {
                 child: const Text('Cancel'),
               ),
               TextButton(
-                onPressed: () => Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => const LoginView())),
+                onPressed: () => Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(builder: (context) => const LoginView()),
+                    (route) => false),
                 child: const Text('OK'),
               ),
             ],

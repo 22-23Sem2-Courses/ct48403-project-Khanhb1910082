@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:myproject_app/model/user.dart';
 import 'package:myproject_app/service/favorite_service.dart';
 import 'package:myproject_app/service/user_service.dart';
+import 'package:myproject_app/ui/cart/cart_manager.dart';
 import 'package:provider/provider.dart';
 
 import 'ui/screen.dart';
@@ -21,6 +22,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => CartManager()),
         ChangeNotifierProvider(create: (_) => FavoriteManager()),
       ],
       child: MaterialApp(

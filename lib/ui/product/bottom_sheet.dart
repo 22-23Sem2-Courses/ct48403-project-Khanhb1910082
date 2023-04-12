@@ -275,7 +275,8 @@ class _BottomSheetViewState extends State<BottomSheetView> {
                             .doc(FirebaseAuth.instance.currentUser!.email)
                             .collection(FirebaseAuth.instance.currentUser!.email
                                 .toString())
-                            .doc(widget.product.id)
+                            .doc(widget.product.id +
+                                widget.product.color[_selectedIndex])
                             .set(
                                 CartItem(
                                         id: widget.product.id,

@@ -47,10 +47,10 @@ class MainPage extends StatelessWidget {
         body: StreamBuilder<List<Users>>(
             stream: UserService.readUser(),
             builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return const HomeView();
-              } else {
+              if (!snapshot.hasData) {
                 return const LoginView();
+              } else {
+                return const HomeView();
               }
             }));
   }

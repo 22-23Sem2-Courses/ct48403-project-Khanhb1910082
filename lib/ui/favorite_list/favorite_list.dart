@@ -161,7 +161,7 @@ class _FavoriteListViewState extends State<FavoriteListView> {
                             .doc(product.id)
                             .delete();
                         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text("Đã bỏ thích sản phẩm"),
+                          content: const Text("Đã bỏ thích sản phẩm"),
                           action: SnackBarAction(
                             label: "Hủy",
                             onPressed: () {

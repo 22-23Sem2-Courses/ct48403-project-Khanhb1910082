@@ -4,7 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:money_formatter/money_formatter.dart';
 import 'package:myproject_app/service/user_service.dart';
+import 'package:myproject_app/ui/home/home_view.dart';
 import 'package:myproject_app/ui/order/order_view.dart';
+import 'package:myproject_app/ui/profile/profile_detail.dart';
 import 'package:myproject_app/ui/profile/profile_view.dart';
 import 'package:provider/provider.dart';
 
@@ -421,10 +423,29 @@ class _CartViewState extends State<CartView> {
                                               style: TextStyle(fontSize: 17),
                                             ),
                                             onPressed: () {
-                                              Navigator.of(context).push(
-                                                  MaterialPageRoute(
-                                                      builder: (_) =>
-                                                          const ProfileView()));
+                                              Navigator.of(context)
+                                                  .pushAndRemoveUntil(
+                                                MaterialPageRoute(
+                                                    builder: (_) =>
+                                                        const HomeView(
+                                                          2,
+                                                        )),
+                                                (route) => false,
+                                              );
+                                            },
+                                          ),
+                                          TextButton(
+                                            style: TextButton.styleFrom(
+                                              textStyle: Theme.of(context)
+                                                  .textTheme
+                                                  .labelLarge,
+                                            ),
+                                            child: const Text(
+                                              'Cancel',
+                                              style: TextStyle(fontSize: 17),
+                                            ),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
                                             },
                                           ),
                                         ],

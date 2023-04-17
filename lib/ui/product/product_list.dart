@@ -108,27 +108,6 @@ class _ProductListState extends State<ProductList> {
                                 ),
                               ),
                             ),
-                            // InkWell(
-                            //     onTap: () {
-                            //       // final user =
-                            //       //     FirebaseAuth.instance.currentUser!.email;
-                            //       // final fa = FirebaseFirestore.instance
-                            //       //     .collection('favoritelist')
-                            //       //     .doc(user)
-                            //       //     .collection(user.toString());
-                            //       // final snap = await fa.get();
-                            //       // for (var doc in snap.docs) {
-                            //       //   if (doc.reference.id == product.id) {
-                            //       //     isFavorite = true;
-                            //       //   } else {
-                            //       //     isFavorite = false;
-                            //       //   }
-                            //       // }
-                            //       setState(() {
-                            //         isFavorite = !isFavorite;
-                            //       });
-                            //     },
-                            //     child: Text(isFavorite ? 'true' : 'false')),
                           ],
                         ),
                       ),

@@ -327,8 +327,10 @@ class _LoginViewState extends State<LoginView> {
         password: _passwordController.text.trim(),
       )
           .then((value) {
-        Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (context) => const HomeView()));
+        Navigator.of(context).pushReplacement(MaterialPageRoute(
+            builder: (context) => const HomeView(
+                  0,
+                )));
       }).onError((error, stackTrace) {
         showDialog(
           context: context,

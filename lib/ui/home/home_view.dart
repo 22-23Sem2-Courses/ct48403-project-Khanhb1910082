@@ -5,13 +5,14 @@ import 'package:provider/provider.dart';
 import '../screen.dart';
 
 class HomeView extends StatefulWidget {
-  const HomeView({super.key});
+  const HomeView(this._page, {super.key});
+  final int _page;
   @override
   State<HomeView> createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
-  int _indexPage = 0;
+  late int _indexPage = widget._page;
   void _setTotalCart() async {
     final cartProvider = Provider.of<CartManager>(context, listen: false);
     await cartProvider.setTotalCart();

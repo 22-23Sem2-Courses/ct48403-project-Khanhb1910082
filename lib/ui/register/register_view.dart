@@ -218,14 +218,14 @@ class _RegisterViewState extends State<RegisterView> {
                 'Đăng nhập ngay để nhận ngay hàng ngàn sản phẩm được trợ giá'),
             actions: <Widget>[
               TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              TextButton(
                 onPressed: () => Navigator.of(context).pushAndRemoveUntil(
                     MaterialPageRoute(builder: (context) => const LoginView()),
                     (route) => false),
                 child: const Text('OK'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
               ),
             ],
           ),

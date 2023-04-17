@@ -192,11 +192,11 @@ class _ProfileViewState extends State<ProfileView> {
         stream: UserService.readUser(),
         builder: (context, snapshot) {
           if (snapshot.hasError) {
-            return Center(
+            return const Center(
               child: Text("Hệ thống đang được bảo trì"),
             );
           } else if (!snapshot.hasData) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(),
             );
           } else {
@@ -224,7 +224,7 @@ class _ProfileViewState extends State<ProfileView> {
               ),
               child: const Center(
                   child: Text(
-                "Sửa",
+                "",
                 style: TextStyle(fontWeight: FontWeight.w700),
               )),
             ),
